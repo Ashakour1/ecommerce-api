@@ -6,6 +6,7 @@ import users from './routes/users.js';
 import products from './routes/product.js';
 import orders from './routes/order.js';
 import cart from './routes/cart.js';
+import stripeRoute from './routes/stripe.js';
 
 const App = express();
 dotenv.config();
@@ -20,6 +21,7 @@ App.use('/api/auth',auth);
 App.use('/api/products',products);
 App.use('/api/orders',orders);
 App.use('/api/carts',cart);
+App.use('/api/checkOut',stripeRoute);
 
 
 App.listen(PORT, () => {
