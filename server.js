@@ -3,6 +3,7 @@ import auth from './routes/auth.js';
 import dotenv from 'dotenv';
 import connectDb from './config/db.js';
 import users from './routes/users.js';
+import products from './routes/product.js';
 
 const App = express();
 dotenv.config();
