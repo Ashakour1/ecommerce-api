@@ -1,5 +1,5 @@
 import express from "express";
-import product from "../models/User.js";
+import product from "../models/Product.js";
 import CryptoJS from "crypto-js";
 import {
   verifyTokenAndAdmin,
@@ -7,100 +7,79 @@ import {
 } from "./verifyToken.js";
 const router = express.Router();
 
+router.post("/", verifyTokenAndAdmin, async (req, res) => {
+  const newProduct = new product(req.body);
 
-router.post("/", async(req,res) => {
-    
-})
+  try {
+    const savedProduct = await newProduct.save();
+    res.status(200).json(savedProduct);
+  } catch (error) {
+    res.status(500).json(error.message);
+  }
+});
 
 // // Update
-// router.put("/:id", verifyTokenAndAuthorization, async (req, res) => {
-//   if (req.body.password) {
-//     req.body.password = CryptoJS.AES.encrypt(
-//       req.body.password,
-//       process.env.SECRET_KEY
-//     ).toString();
-//   }
+router.put("/:id", verifyTokenAndAdmin, async (req, res) => {
+  try {
+    const updatedProduct = await product.findByIdAndUpdate(
+      req.params.id,
+      {
+        $set: req.body,
+      },
+      { new: true }
+    );
+    res.status(200).json(updatedProduct);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
 
-//   try {
-//     const updatedUser = await User.findByIdAndUpdate(
-//       req.params.id,
-//       {
-//         $set: req.body,
-//       },
-//       { new: true }
-//     );
-//     res.status(200).json(updatedUser);
-//   } catch (err) {
-//     res.status(500).json(err);
-//   }
-// });
+router.delete("/:id", verifyTokenAndAdmin, async (req, res) => {
+  try {
+    const product = await product.findByIdAndDelete(req.params.id);
 
-// router.delete("/:id", verifyTokenAndAuthorization, async (req, res) => {
-//   try {
-//     const user = await User.findByIdAndDelete(req.params.id);
+    res.status(200).json("Product has been deleted");
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+router.get("/product/:id", async (req, res) => {
+  try {
+    const product = await product.findById(req.params.id);
 
-//     res.status(200).json("User has been deleted");
-//   } catch (err) {
-//     res.status(500).json(err);
-//   }
-// });
-// router.get("/find/:id", verifyTokenAndAdmin, async (req, res) => {
-//   try {
-//     const user = await User.findById(req.params.id);
-//     const { password, ...others } = user._doc;
-//     res.status(200).json({
-//       others,
-//     });
-//   } catch (err) {
-//     res.status(500).json(err);
-//   }
-// });
-// router.get("/", verifyTokenAndAdmin, async (req, res) => {
-//   const query = req.query.new;
-//   try {
-//     const users = query
-//       ? await User.find().sort({ _id: -1 }).limit(1)
-//       : await User.find();
+    res.status(200).json({
+      product,
+    });
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+router.get("/", async (req, res) => {
+  const qNew = req.query.new;
+  const qCategory = req.query.category;
 
-//     res.status(200).json({
-//       users,
-//     });
-//   } catch (err) {
-//     res.status(500).json(err);
-//   }
-// });
+  try {
+    let products;
 
-// // Get user stats
+    if (qNew) {
+      products = await product.find().sort({ createdAt: -1 }).limit(5);
+    } else if (qCategory) {
+      products = await product.find({
+        categories: {
+          $in: [qCategory],
+        },
+      });
+    } else {
+      products = await product.find();
+    }
 
-// router.get("/stats", verifyTokenAndAdmin, async (req, res) => {
-//   const date = new Date();
-//   const lastYear = new Date(date.setFullYear(date.getFullYear() - 1));
+    res.status(200).json({
+      products,
+    });
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
 
-//   try {
-//     const data = await User.aggregate([
-//       {
-//         $match: {
-//           createdAt: { $gte: lastYear },
-//         },
-//       },
-//       {
-//         $project: {
-//           month: {
-//             $month: "$createdAt",
-//           },
-//         },
 
-//       },
-//       {
-//         $group : {
-//             _id : "$month",
-//             total : { $sum : 1 }
-//         }
-//       }
-//     ]);
-//     res.status(200).json(data);
-//   } catch (error) {
-//     res.status(500).json(error);
-//   }
-// });
 export default router;

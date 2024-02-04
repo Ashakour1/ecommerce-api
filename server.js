@@ -15,6 +15,7 @@ App.use(express.json());
 App.use(express.urlencoded({ extended: true }));
 App.use('/api/users', users);
 App.use('/api/auth',auth);
+App.use('/api/products',products);
 
 
 App.listen(PORT, () => {
