@@ -26,7 +26,7 @@ const OderSchema = new mongoose.Schema(
       required: true,
     },
     address: {
-      type: object,
+      type: String,
       required: true,
     },
     status : {
@@ -39,4 +39,4 @@ const OderSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model("Product", OderSchema);
+export default mongoose.model("order", OderSchema);
