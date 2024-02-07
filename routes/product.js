@@ -1,5 +1,5 @@
 import express from "express";
-import product from "../models/Product.js";
+import Product from "../models/Product.js";
 import CryptoJS from "crypto-js";
 import {
   verifyTokenAndAdmin,
@@ -8,7 +8,7 @@ import {
 const router = express.Router();
 
 router.post("/", verifyTokenAndAdmin, async (req, res) => {
-  const newProduct = new product(req.body);
+  const newProduct = new Product(req.body);
 
   try {
     const savedProduct = await newProduct.save();
@@ -21,7 +21,7 @@ router.post("/", verifyTokenAndAdmin, async (req, res) => {
 // // Update
 router.put("/:id", verifyTokenAndAdmin, async (req, res) => {
   try {
-    const updatedProduct = await product.findByIdAndUpdate(
+    const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
       {
         $set: req.body,
@@ -36,7 +36,7 @@ router.put("/:id", verifyTokenAndAdmin, async (req, res) => {
 
 router.delete("/:id", verifyTokenAndAdmin, async (req, res) => {
   try {
-    const product = await product.findByIdAndDelete(req.params.id);
+    const product = await Product.findByIdAndDelete(req.params.id);
 
     res.status(200).json("Product has been deleted");
   } catch (err) {
@@ -44,9 +44,11 @@ router.delete("/:id", verifyTokenAndAdmin, async (req, res) => {
   }
 });
 router.get("/find/:id", async (req, res) => {
+  // console.log(req.params.id);
   try {
-    const product = await product.findById(req.params.id);
+    const product = await Product.findById(req.params.id);
 
+    // console.log(product);
     res.status(200).json({
       product,
     });
@@ -62,15 +64,15 @@ router.get("/", async (req, res) => {
     let products;
 
     if (qNew) {
-      products = await product.find().sort({ createdAt: -1 }).limit(5);
+      products = await Product.find().sort({ createdAt: -1 }).limit(5);
     } else if (qCategory) {
-      products = await product.find({
+      products = await Product.find({
         categories: {
           $in: [qCategory],
         },
       });
     } else {
-      products = await product.find();
+      products = await Product.find();
     }
 
     res.status(200).json({
@@ -80,6 +82,5 @@ router.get("/", async (req, res) => {
     res.status(500).json(err);
   }
 });
-
 
 export default router;
